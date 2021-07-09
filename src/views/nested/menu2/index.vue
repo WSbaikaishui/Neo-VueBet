@@ -73,7 +73,7 @@
         label='Threshold'
         prop='threshold'>
         <template scope='scope'>
-          {{  scope.row.threshold }}
+          {{  scope.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}') }}
         </template>
       </el-table-column>
       <el-table-column
@@ -92,7 +92,7 @@
 <script>
 import Neon from '@cityofzion/neon-js'
 import { base64ToString, parseTime } from '@/utils'
-import neo3, { test_bet, bet } from '../../../api/ops'
+import Ops,{ test_bet, bet } from '../../../api/ops'
 export default {
   data() {
     return {
@@ -139,7 +139,7 @@ export default {
     fetchPoolList() {
       const client = Neon.create.rpcClient('http://seed2t.neo.org:20332')
 
-      client.invokeFunction('0xe5a380a184eb3c5d99226c646a06577f429d913d', 'list_ongoing_pools')
+      client.invokeFunction(Ops.BET_CONTRACT, 'list_ongoing_pools')
         .then(value => {
           var result = value['stack'][0]['value']
           for (var i in result) {
@@ -170,7 +170,7 @@ export default {
         .catch(err => console.log(err))
     },
     async playBet(val, option) {
-      const neo3Dapi = neo3.neo3Dapi_save
+      const neo3Dapi = window.neo3Dapi_save
       try {
         const runnable = await test_bet(val, option, neo3Dapi)
         if (runnable.state) {
@@ -178,7 +178,7 @@ export default {
           console.log(response)
           return {
             'message': 'success',
-            'data': 'TxId' + response
+            'data': 'TxId: ' + response['txid']
           }
         } else {
           return runnable
@@ -210,7 +210,7 @@ export default {
         type: 'warning',
         center: true
       }).then(() => {
-        if (neo3.neo3Dapi_save === '') {
+        if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
             message: '请先连接NeoLine'

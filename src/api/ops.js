@@ -1,11 +1,12 @@
-const neo3Dapi_save = ''
 
-export default
-{
-  neo3Dapi_save
-}
+window.neo3Dapi_save = ''
+window.isNeoLine = true
+
 let initResult
-const BET_CONTRACT = '0xe5a380a184eb3c5d99226c646a06577f429d913d'
+const BET_CONTRACT = '0x70eec13e22e13b2acc1d67e79d63b0c23823d5b9'
+export default {
+  BET_CONTRACT
+}
 export function init() {
   return new Promise((resovle, reject) => {
     function onReady() {
@@ -17,8 +18,10 @@ export function init() {
     window.addEventListener('NEOLine.N3.EVENT.READY', onReady)
     setTimeout(() => {
       reject(new Error('neoline not installed!'))
-    }, 10000)
-  })
+    }, 3000)
+  }).catch((err) =>
+    window.isNeoLine = false
+  )
 }
 export function getNeoDapiInstances() {
   if (!initResult) {
@@ -158,7 +161,6 @@ export async function test_cancel_bet(pool_id, neo3Dapi) {
     return false
   } else return true
 }
-
 export async function pool_init(token_id, url, json_filter, margin, expiry, threshold, deposit, strike, description, neo3Dapi) {
   const result = await neo3Dapi.getAccount()
   const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
@@ -215,7 +217,10 @@ export async function pool_init(token_id, url, json_filter, margin, expiry, thre
     }
     ]
   })
-  return response
+  return {
+    'message': 'success',
+    'data': 'Your pool_id is: ' + response.txid
+  }
 }
 
 export async function test_pool_init(token_id, url, json_filter, margin, expiry, threshold, deposit, strike, description, neo3Dapi) {
@@ -275,11 +280,17 @@ export async function test_pool_init(token_id, url, json_filter, margin, expiry,
     ]
   })
   if (response.state === 'FAULT') {
-    alert('Oops! There seems to be an error!\n' + response.exception.slice(35))
-    return false
-  } else return true
+    return {
+      'message': 'error',
+      'data': response.exception.slice(35),
+      'state': false
+    }
+  } else {
+    return {
+      'state': true
+    }
+  }
 }
-
 export async function cancel_pool(pool_id, neo3Dapi) {
   const response = await neo3Dapi.invoke({
     scriptHash: BET_CONTRACT,

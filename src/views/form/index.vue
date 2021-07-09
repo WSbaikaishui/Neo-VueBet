@@ -3,7 +3,7 @@
     <el-header class="title">Create a Pool</el-header>
     <el-form ref="form" :model="form" :rules="rules" label-width="120px">
       <el-form-item label="Token id" prop="token">
-        <el-select v-model="form.token" size="medium" placeholder="Token accepted">
+        <el-select v-model.number="form.token" size="medium" placeholder="Token accepted">
           <el-option label="NEO" value="0" />
           <el-option label="GAS" value="1" />
         </el-select>
@@ -16,41 +16,33 @@
           reserve-keyword
           placeholder="Type to search"
           :remote-method="remoteMethod"
-          :loading="loading"
-        >
+          :loading="loading">
           <el-option
             v-for="item in options"
             :key="item.value"
             :label="item.label"
-            :value="item.value"
-          />
+            :value="item.value" />
         </el-select>
       </el-form-item>
-      <el-form-item label="Margin" prop="margin">
-        <el-input-number v-model.number="form.margin" :min="1" @change="handleChange" />
+      <el-tooltip class="item" content="The margin your players should invest. In integer." placement="top-start">
+        <el-form-item label="Margin" prop="margin">
+          <el-input-number v-model.number="form.margin" :precision="0" :min="1" @change="handleChange" placeholder="Please input the margin you require (In integer)" size="large"/>
+        </el-form-item>
+      </el-tooltip>
+      <el-form-item label="Desposit" prop="deposit">
+        <el-input-number v-model.number="form.deposit" :precision="0" :min="100000000" @change="handleChange" placeholder="Please input the deposit you would invest (In integer, GAS)" size="large"/>
       </el-form-item>
       <el-form-item label="Time Limits" prop="time">
         <el-row>
-          <el-col span="11">
+          <el-col :span="11">
             <el-form-item prop="expiry">
-              <el-date-picker
-                v-model.number="form.expiry"
-                type="datetime"
-                placeholder="Pick an expiry for your pool"
-                style="width: 80%"
-                value-format="timestamp" />
+              <el-date-picker v-model.number="form.expiry" type="datetime" placeholder="Pick an expiry for your pool" style="width: 80%" value-format="timestamp" />
             </el-form-item>
           </el-col>
-          <el-col span="2" />
-          <el-col span="11">
+          <el-col :span="2" />
+          <el-col :span="11">
             <el-form-item prop="threshold">
-              <el-date-picker
-                v-model.number="form.threshold"
-                type="datetime"
-                placeholder="Pick a threshold for players to join"
-                style="width: 80%"
-                value-format="timestamp"
-              />
+              <el-date-picker v-model.number="form.threshold" type="datetime" placeholder="Pick a threshold for players to join" style="width: 80%" value-format="timestamp" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -59,14 +51,7 @@
         <el-input v-model="form.strike" placeholder="Strike price in decimals" style="width: 50%" />
       </el-form-item>
       <el-form-item label="Description" prop="description">
-        <el-input
-          v-model="form.description"
-          type="textarea"
-          :rows="4"
-          maxlength="300"
-          show-word-limit
-          placeholder="Please describe your pool briefly in 300 words."
-        />
+        <el-input v-model="form.description" type="textarea" :rows="4" maxlength="300" show-word-limit placeholder="Please describe your pool briefly in 300 words." />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="submitForm('form')">Create</el-button>
@@ -77,6 +62,9 @@
 </template>
 
 <script>
+
+import neo3, { test_pool_init, pool_init } from '../../api/ops'
+
 export default {
   data() {
     return {
@@ -84,6 +72,7 @@ export default {
         token: '',
         symbol: '',
         margin: 1,
+        deposit: 2,
         expiry: '',
         threshold: '',
         strike: '',
@@ -102,6 +91,9 @@ export default {
         ],
         margin: [
           { required: true, message: 'Please input margin', trigger: 'blur' }
+        ],
+        deposit: [
+          { required: true, message: 'Please input deposit', trigger: 'blur' }
         ],
         expiry: [
           { required: true, message: 'Please choose your expiry', trigger: 'blur' },
@@ -133,20 +125,20 @@ export default {
             trigger: 'blur'
           }
         ],
-        time: [
-          {
-            required: true,
-            validator(rule, value, callback) {
-              const threshold = this.form.threshold.value
-              if (value.expiry && threshold && value.expiry < threshold) {
-                callback(new Error('Threshold must be set before expiry'))
-              } else {
-                callback()
-              }
-            },
-            trigger: 'blur'
-          }
-        ],
+        // time: [
+        //   {
+        //     required: true,
+        //     validator(rule, value, callback) {
+        //       const threshold = this.$refs['form'].threshold.value
+        //       if (value && threshold && value < threshold) {
+        //         callback(new Error('Threshold must be set before expiry'))
+        //       } else {
+        //         callback()
+        //       }
+        //     },
+        //     trigger: 'blur'
+        //   }
+        // ],
         strike: [
           { required: true, message: 'Please enter strike price', trigger: 'blur' },
           {
@@ -190,15 +182,100 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          this.confirmCreation()
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
+    async poolInit() {
+      const token = this.form.token
+      const symbol = this.form.symbol
+      const json_filter = '$[-1:]..p'
+      const margin = this.form.margin
+      const expiry = this.form.expiry
+      const threshold = this.form.threshold
+      const url = `https://api.binance.com/api/v3/aggTrades?symbol=${symbol}&startTime=${expiry - 1000}&endTime=${expiry}`
+      const deposit = this.form.deposit
+      const strike = this.form.strike
+      const des = this.form.description
+      const neo3Dapi = window.neo3Dapi_save
+      try {
+        const runnable = await test_pool_init(token, url, json_filter, margin, expiry, threshold, deposit, strike, des, neo3Dapi)
+        if (runnable.state) {
+          const response = await pool_init(token, url, json_filter, margin, expiry, threshold, deposit, strike, des, neo3Dapi)
+          console.log(response)
+          return response
+        } else {
+          return runnable
+        }
+      } catch ({ type, description, data }) {
+        switch (type) {
+          case 'NO_PROVIDER':
+            this.$message({
+              'type': 'error',
+              'message': 'There is currently no provider available at NeoLine.'
+            })
+            break
+          case 'CONNECTION_DENIED':
+            this.$message({
+              'type': 'info',
+              'message': 'You have declined our request to connect with NeoLine.'
+            })
+            break
+          case 'CANCELED':
+            this.$message({
+              'type': 'info',
+              'message': 'You have cancelled the transaction.'
+            })
+            break
+          case 'RPC_ERROR':
+            this.$message({
+              'type': 'error',
+              'message': 'RPC Client failed.'
+            })
+            break
+          case 'MALFORMED_INPUT':
+            this.$message({
+              'type': 'error',
+              'message': 'There is something wrong with your input format.'
+            })
+        }
+      }
+      console.log()
+    },
+
+    confirmCreation() {
+      this.$confirm('You will be directed to NeoLine for a second approval.', 'Confirm creation of pool?', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        type: 'info',
+        center: true
+      }).then(() => {
+        if (neo3.neo3Dapi_save === '') {
+          this.$message({
+            type: 'error',
+            message: 'Please first connect to NeoLine.'
+          })
+        } else {
+          this.poolInit().then((val) => {
+            this.$message({
+              type: val.message,
+              message: val.data
+            })
+          }
+          )
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: 'You have cancelled the transaction.'
+        })
+      })
+    },
     resetForm(formName) {
-      this.$refs[formName].resetFields()
+      this.$refs[formName].resetFields();
     },
     handleChange(value) {
       console.log(value)

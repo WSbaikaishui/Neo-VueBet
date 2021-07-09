@@ -5,16 +5,13 @@
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <el-dropdown class="avatar-container" trigger="click">
-        <div class="avatar-wrapper" >
+<!--      <el-dropdown class="avatar-container" trigger="click">-->
+        <div class="avatar-wrapper" style="margin-right: 30px">
           <el-button v-if="!neo3Dapi" type="primary" @click="wallet()">Connect to Neo </el-button>
-          <el-tag  v-else type="success"  effect="dark" >Connected  </el-tag>
+          <el-tag v-else type="success" effect="dark">Connected  </el-tag>
         </div>
-        <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <router-link to="/">
-          </router-link>
-        </el-dropdown-menu>
-      </el-dropdown>
+        <router-link to="/" />
+<!--      </el-dropdown>-->
     </div>
   </div>
 </template>
@@ -23,7 +20,7 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import neo3 from '../../api/ops'
+import { getNeoDapiInstances } from '../../api/ops'
 
 export default {
   components: {
@@ -42,44 +39,27 @@ export default {
     ])
   },
   created() {
-    this.neo3Dapi = neo3.neo3Dapi_save
+    this.neo3Dapi = window.neo3Dapi_save
   },
 
   methods: {
-
+    async getNeo3() {
+      const neo3Dapi = (await getNeoDapiInstances()).neo3Dapi
+      await (window.neo3Dapi_save = await neo3Dapi)
+      const { address } = await neo3Dapi.getAccount()
+      await (this.neo3Dapi = await neo3Dapi)
+      console.log(address)
+    },
     async wallet() {
-      let initResult
-
-      function init() {
-        return new Promise((resovle, reject) => {
-          function onReady() {
-            if (!window.NEOLineN3) { return }
-            const neo3Dapi = new window.NEOLineN3.Init()
-            return resovle({ neo3Dapi })
-          }
-          onReady()
-          window.addEventListener('NEOLine.N3.EVENT.READY', onReady)
-          setTimeout(() => {
-            reject(new Error('neoline not installed!'))
-          }, 3000)
-        })
-      }
-      function getNeoDapiInstances() {
-        if (!initResult) {
-          initResult = init()
-        }
-        return initResult
-      }
       try {
-        const neo3Dapi = (await getNeoDapiInstances()).neo3Dapi
-        await (this.neo3Dapi = await neo3Dapi)
-        await (neo3.neo3Dapi_save = await neo3Dapi)
-        this.$message({
-          type: 'success',
-          message: '连接成功'
+        this.getNeo3().then(() => {
+          this.$message({
+            type: 'success',
+            message: 'Connection Success'
+          })
         })
       } catch (e) {
-        this.$message.error('You have rejected the request to connect with your dApp')
+        this.$message.error('You have declined the request to connect to Neoline wallet.or No NeoLine')
       }
     },
     toggleSideBar() {
