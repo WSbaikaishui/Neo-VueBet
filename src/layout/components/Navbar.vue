@@ -6,25 +6,13 @@
 
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
-        <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
-          <i class="el-icon-caret-bottom" />
+        <div class="avatar-wrapper" >
+          <el-button v-if="!neo3Dapi" type="primary" @click="wallet()">Connect to Neo </el-button>
+          <el-tag  v-else type="success"  effect="dark" >Connected  </el-tag>
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
-            <el-dropdown-item>
-              Home
-            </el-dropdown-item>
           </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
-          <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
-          </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </div>
@@ -35,11 +23,17 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+import neo3 from '../../api/ops'
 
 export default {
   components: {
     Breadcrumb,
     Hamburger
+  },
+  data() {
+    return {
+      neo3Dapi: ''
+    }
   },
   computed: {
     ...mapGetters([
@@ -47,7 +41,47 @@ export default {
       'avatar'
     ])
   },
+  created() {
+    this.neo3Dapi = neo3.neo3Dapi_save
+  },
+
   methods: {
+
+    async wallet() {
+      let initResult
+
+      function init() {
+        return new Promise((resovle, reject) => {
+          function onReady() {
+            if (!window.NEOLineN3) { return }
+            const neo3Dapi = new window.NEOLineN3.Init()
+            return resovle({ neo3Dapi })
+          }
+          onReady()
+          window.addEventListener('NEOLine.N3.EVENT.READY', onReady)
+          setTimeout(() => {
+            reject(new Error('neoline not installed!'))
+          }, 3000)
+        })
+      }
+      function getNeoDapiInstances() {
+        if (!initResult) {
+          initResult = init()
+        }
+        return initResult
+      }
+      try {
+        const neo3Dapi = (await getNeoDapiInstances()).neo3Dapi
+        await (this.neo3Dapi = await neo3Dapi)
+        await (neo3.neo3Dapi_save = await neo3Dapi)
+        this.$message({
+          type: 'success',
+          message: '连接成功'
+        })
+      } catch (e) {
+        this.$message.error('You have rejected the request to connect with your dApp')
+      }
+    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
@@ -112,10 +146,10 @@ export default {
     }
 
     .avatar-container {
-      margin-right: 30px;
+      margin-right: 50px;
 
       .avatar-wrapper {
-        margin-top: 5px;
+        margin-top: 1px;
         position: relative;
 
         .user-avatar {

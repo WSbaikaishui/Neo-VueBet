@@ -14,6 +14,12 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+// 导入时间插件momentjs
+import moment from 'moment'
+// 定义全局时间格式过滤器
+Vue.filter('dateFormat', function(daraStr, pattern = 'YYYY-MM-DD HH:mm:ss') {
+  return moment(daraStr).format(pattern)
+})
 
 /**
  * If you don't want to use mock-server

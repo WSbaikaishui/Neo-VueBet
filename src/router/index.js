@@ -40,12 +40,12 @@ export const constantRoutes = [
   {
     path: '/',
     component: Layout,
-    redirect: '/dashboard',
+    redirect: '/NEOOPS',
     children: [{
-      path: 'dashboard',
-      name: 'Dashboard',
-      component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      path: 'NEOOPS',
+      name: 'NEOOPS',
+      component: () => import('@/views/NEOOPS/index'),
+      meta: { title: 'NEOOPS', icon: 'dashboard' }
     }]
   },
   {
@@ -59,8 +59,8 @@ export const constantRoutes = [
     path: '/example',
     component: Layout,
     redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'el-icon-s-help' },
+    name: 'TRENDING',
+    meta: { title: 'TRENDING', icon: 'el-icon-s-help' },
     children: [
       {
         path: 'table',
@@ -83,9 +83,9 @@ export const constantRoutes = [
     children: [
       {
         path: 'index',
-        name: 'Form',
+        name: 'PLAYER',
         component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
+        meta: { title: 'PLAYER', icon: 'form' }
       }
     ]
   },
@@ -94,9 +94,9 @@ export const constantRoutes = [
     path: '/nested',
     component: Layout,
     redirect: '/nested/menu1',
-    name: 'Nested',
+    name: 'MANAGER',
     meta: {
-      title: 'Nested',
+      title: 'MANAGER',
       icon: 'nested'
     },
     children: [
