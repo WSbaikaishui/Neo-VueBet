@@ -78,14 +78,26 @@ export const constantRoutes = [
   },
 
   {
-    path: '/form',
+    path: '/Player',
     component: Layout,
     children: [
       {
         path: 'index',
         name: 'PLAYER',
-        component: () => import('@/views/form/index'),
+        component: () => import('@/views/Player/index'),
         meta: { title: 'PLAYER', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/login',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'TRENDING',
+        component: () => import('@/views/login/index'),
+        meta: { title: 'TRENDING', icon: 'form' }
       }
     ]
   },
@@ -149,16 +161,6 @@ export const constantRoutes = [
     ]
   },
 
-  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
-      }
-    ]
-  },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

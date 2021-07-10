@@ -129,7 +129,7 @@ export default {
         //   {
         //     required: true,
         //     validator(rule, value, callback) {
-        //       const threshold = this.$refs['form'].threshold.value
+        //       const threshold = this.$refs['Player'].threshold.value
         //       if (value && threshold && value < threshold) {
         //         callback(new Error('Threshold must be set before expiry'))
         //       } else {

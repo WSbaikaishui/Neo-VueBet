@@ -19,9 +19,9 @@
             <el-form-item label='Strike Price'>
               <span>{{ props.row.strike_price }}</span>
             </el-form-item>
-<!--            <el-form-item label='Expiry'>-->
+<!--            <el-Player-item label='Expiry'>-->
 <!--              <span>{{ props.row.expiry |parseTime( '{y}-{m}-{d} {h}:{i}') }}</span>-->
-<!--            </el-form-item>-->
+<!--            </el-Player-item>-->
             <el-form-item label='Margin'>
               <span>{{ props.row.margin }}</span>
             </el-form-item>

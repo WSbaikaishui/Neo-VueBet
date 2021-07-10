@@ -6,40 +6,26 @@
       v-loading="loading"
       :data='tableData'
       style='width: 100%'
-      align="center"
-
-    >
+      align="center">
       <el-table-column type='expand'>
         <template slot-scope='props'>
           <el-form label-position='left' inline class='demo-table-expand'>
-            <el-form-item label='PoolHash'>
-              <span>{{ props.row.pool_id }}</span>
-            </el-form-item>
-            <el-form-item label='Description'>
-              <span>{{ props.row.description }}</span>
-            </el-form-item>
-            <el-form-item label='Strike Price'>
-              <span>{{ props.row.strike_price }}</span>
-            </el-form-item>
-
-            <el-form-item label='Margin'>
-              <span>{{ props.row.margin }}</span>
-            </el-form-item>
-            <el-form-item label='TotalMargin'>
-              <span>{{ props.row.total_margin }}</span>
-            </el-form-item>
-
-            <el-form-item label='Long'>
+            <el-card shadow="never">
+              <el-form-item label='Description'>
+                <span>{{ props.row.description }}</span>
+              </el-form-item>
+            </el-card>
+            <el-form-item label='Total Long'>
               <span>{{ props.row.long }}</span>
             </el-form-item>
-            <el-form-item label='Short'>
+            <el-form-item label='Total Short'>
               <span>{{ props.row.short }}</span>
             </el-form-item>
-            <el-form-item label='threshold'>
-              <span>{{ props.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}')}}</span>
+            <el-form-item label='Total Margin'>
+              <span>{{ props.row.total_margin }}</span>
             </el-form-item>
-            <el-form-item label='倒计时'>
-              <span>{{ props.row.symbol }}</span>
+            <el-form-item label='Threshold'>
+              <span>{{ props.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}')}}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -48,6 +34,15 @@
         label='PoolHash'
         prop='pool_id'
         align="center">
+      </el-table-column>
+      <el-table-column
+        label='Token'
+        prop='token'
+        align="center"
+      >
+        <template scope='scope' style="text-align: center">
+          {{  scope.row.token === 0? 'NEO' : 'GAS' }}
+        </template>
       </el-table-column>
       <el-table-column
         label='Margin'
@@ -65,9 +60,39 @@
       </el-table-column>
       <el-table-column
         label='Symbol'
-        prop='symbol'>
+        prop='symbol'
+        align="center"
+      >
         <template scope='scope'>
           {{  scope.row.symbol }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label='Strike Price'
+        prop='strike'
+        align="center"
+      >
+        <template scope='scope'>
+          {{  scope.row.strike_price }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label='Status'
+        prop='status'
+        align="center"
+      >
+        <template scope='scope'>
+          <el-tag :type="scope.row.status | statusFilter"> {{scope.row.status | statusPromptFilter}}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label='Position'
+        prop='position'
+        align="center"
+      >
+        <template scope='scope'>
+          <el-tag v-if="scope.row.position === '1'" >LONG</el-tag>
+          <el-tag v-else type="danger" >SHORT</el-tag>
         </template>
       </el-table-column>
       <el-table-column
@@ -101,6 +126,22 @@ export default {
   filters: {
     parseTime(time, cFormat) {
       return parseTime(time, cFormat)
+    },
+    statusFilter(status) {
+      const statusMap = {
+        0: 'success',
+        1: 'warning',
+        2: 'danger'
+      }
+      return statusMap[status]
+    },
+    statusPromptFilter(status){
+      const statusMap = {
+        0: 'Ongoing',
+        1: 'Finished',
+        2: 'Canceled'
+      }
+      return statusMap[status]
     }
   },
 
