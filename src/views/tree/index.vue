@@ -243,6 +243,11 @@ export default {
               type: val.message,
               message: val.data
             })
+            this.tableData = []
+            setTimeout(
+              this.fetchPoolList,
+              8000
+            )
           }
           )
         }
