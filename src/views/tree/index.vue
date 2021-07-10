@@ -96,7 +96,7 @@
       </el-table-column>
       <el-table-column label="Cancel" align="center">
         <template slot-scope="scope" >
-          <el-button @click="onCancelBet(scope.row)" type="success" size="large" plain>Cancel</el-button>
+          <el-button @click="onCancelBet(scope.row, scope.$index)" type="success" size="large" plain>Cancel</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -225,7 +225,7 @@ export default {
         }
       }
     },
-    onCancelBet(val) {
+    onCancelBet(val, index) {
       this.$confirm('You will be charged a 0.3% of your margin as penalty, plus any system / network fees incurred.', 'Confirm cancellation of bet?', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
@@ -243,6 +243,7 @@ export default {
               type: val.message,
               message: val.data
             })
+            this.tableData.splice(index, 1)
           }
           )
         }
