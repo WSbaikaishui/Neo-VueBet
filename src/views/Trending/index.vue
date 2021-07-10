@@ -1,47 +1,32 @@
 <template>
   <div style='padding:30px;'>
-    <el-alert :closable='false' title='menu 2' />
     <el-table
       v-loading="loading"
       :data='tableData'
       style='width: 100%'
-    align="center"
-      @sort-change="onSortChange">
-      <el-table-column type='expand' >
+      align="center">
+      <el-table-column type='expand'>
         <template slot-scope='props'>
           <el-form label-position='left' inline class='demo-table-expand'>
-            <el-form-item label='PoolHash'>
-              <span>{{ props.row.pool_id }}</span>
-            </el-form-item>
-            <el-form-item label='Description'>
-              <span>{{ props.row.description }}</span>
-            </el-form-item>
-            <el-form-item label='Strike Price'>
-              <span>{{ props.row.strike_price }}</span>
-            </el-form-item>
-<!--            <el-Pool-item label='Expiry'>-->
-<!--              <span>{{ props.row.expiry |parseTime( '{y}-{m}-{d} {h}:{i}') }}</span>-->
-<!--            </el-Pool-item>-->
-            <el-form-item label='Margin'>
-              <span>{{ props.row.margin }}</span>
-            </el-form-item>
-            <el-form-item label='TotalMargin'>
-              <span>{{ props.row.total_margin }}</span>
-            </el-form-item>
-            <el-form-item label='Deposit'>
-              <span>{{ props.row.deposit }}</span>
-            </el-form-item>
-            <el-form-item label='Long'>
+            <el-card shadow="never">
+              <el-form-item label='Description'>
+                <span>{{ props.row.description }}</span>
+              </el-form-item>
+            </el-card>
+            <el-form-item label='Total Long'>
               <span>{{ props.row.long }}</span>
             </el-form-item>
-            <el-form-item label='Short'>
+            <el-form-item label='Total Short'>
               <span>{{ props.row.short }}</span>
             </el-form-item>
-            <el-form-item label='threshold'>
+            <el-form-item label='Total Margin'>
+              <span>{{ props.row.total_margin }}</span>
+            </el-form-item>
+            <el-form-item label='Threshold'>
               <span>{{ props.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}')}}</span>
             </el-form-item>
-            <el-form-item label='倒计时'>
-              <span>{{ props.row.symbol }}</span>
+            <el-form-item label='Total Margin'>
+              <span>{{ props.row.deposit }}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -49,22 +34,26 @@
       <el-table-column
         label='PoolHash'
         prop='pool_id'
+        align="center">
+      </el-table-column>
+      <el-table-column
+        label='Token'
+        prop='token'
         align="center"
       >
+        <template scope='scope' style="text-align: center">
+          {{  scope.row.token === 0? 'NEO' : 'GAS' }}
+        </template>
       </el-table-column>
       <el-table-column
         label='Margin'
         prop='margin'
-        align="center"
-        :sort-orders ="['ascending', 'descending' ]"
-      >
+        align="center">
       </el-table-column>
       <el-table-column
         label='Expiry'
         prop='expiry '
         align="center"
-        sortable
-        :sort-orders ="['ascending', 'descending' ]"
       >
         <template scope='scope' style="text-align: center">
           {{  scope.row.expiry | parseTime( '{y}-{m}-{d} {h}:{i}') }}
@@ -72,24 +61,28 @@
       </el-table-column>
       <el-table-column
         label='Symbol'
-        prop='symbol'>
+        prop='symbol'
+        align="center"
+      >
         <template scope='scope'>
           {{  scope.row.symbol }}
         </template>
       </el-table-column>
       <el-table-column
-        label='Threshold'
-        prop='threshold'>
+        label='Strike Price'
+        prop='strike'
+        align="center"
+      >
         <template scope='scope'>
-          {{  scope.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}') }}
+          {{  scope.row.strike_price }}
         </template>
       </el-table-column>
+
       <el-table-column
         label='Bet'
-      align="center"
-      >
+        align="center">
         <template slot-scope="scope" >
-            <el-button @click="isBet(scope.row,1)"  type="primary" plain>Short</el-button>
+          <el-button @click="isBet(scope.row,1)"  type="primary" plain>Short</el-button>
           <el-button @click="isBet(scope.row,2)"  type="primary" plain>Long</el-button>
         </template>
       </el-table-column>
@@ -101,7 +94,7 @@
 <script>
 import Neon from '@cityofzion/neon-js'
 import { base64ToString, parseTime } from '@/utils'
-import neo3, { test_bet, bet } from '../../../api/ops'
+import neo3, { test_bet, bet } from '../../api/ops'
 export default {
   data() {
     return {
@@ -115,33 +108,27 @@ export default {
   filters: {
     parseTime(time, cFormat) {
       return parseTime(time, cFormat)
+    },
+    statusFilter(status) {
+      const statusMap = {
+        0: 'success',
+        1: 'warning',
+        2: 'danger'
+      }
+      return statusMap[status]
+    },
+    statusPromptFilter(status){
+      const statusMap = {
+        0: 'Ongoing',
+        1: 'Finished',
+        2: 'Canceled'
+      }
+      return statusMap[status]
     }
   },
 
   created: function() {
-    // Loading.service({ body: true })
     this.fetchPoolList()
-    // Loading.service({ body: false })
-    // var that = this
-    // new Promise(function(resolve, reject) {
-    //   setTimeout(function() {
-    //     console.log('First')
-    //     that.fetchPoolList()
-    //     resolve()
-    //   }, 1000)
-    // }).then(function() {
-    //   return new Promise(function(resolve, reject) {
-    //     setTimeout(function() {
-    //       console.log('Second')
-    //       for (let i in that.tableData) {
-    //         that.tableData[i].countDownTime = ''
-    //         that.countDown(i)
-    //         console.log(i)
-    //       }
-    //       resolve()
-    //     }, 4000)
-    //   })
-    // })//this.countdowm(1635711484365)
   },
 
   methods: {
@@ -151,7 +138,7 @@ export default {
     },
     fetchPoolList() {
       const client = Neon.create.rpcClient('http://seed2t.neo.org:20332')
-
+      this.tableData = []
       client.invokeFunction(neo3.BET_CONTRACT, 'list_ongoing_pools')
         .then(value => {
           var result = value['stack'][0]['value']
@@ -268,14 +255,14 @@ export default {
 </script>
 
 <style scoped>
-.demo-table-expand {
+  .demo-table-expand {
     font-size: 0;
   }
-.demo-table-expand label {
+  .demo-table-expand label {
     width: 90px;
     color: #99a9bf;
   }
-.demo-table-expand .el-form-item {
+  .demo-table-expand .el-form-item {
     margin-right: 0;
     margin-bottom: 0;
     width: 50%;

@@ -1,4 +1,4 @@
-// import { login, logout, getInfo } from '@/api/user'
+// import { Trending, logout, getInfo } from '@/api/user'
 // import { getToken, setToken, removeToken } from '@/utils/auth'
 // import { resetRouter } from '@/router'
 //
@@ -28,11 +28,11 @@
 // }
 //
 // const actions = {
-//   // user login
-//   login({ commit }, userInfo) {
+//   // user Trending
+//   Trending({ commit }, userInfo) {
 //     const { username, password } = userInfo
 //     return new Promise((resolve, reject) => {
-//       login({ username: username.trim(), password: password }).then(response => {
+//       Trending({ username: username.trim(), password: password }).then(response => {
 //         const { data } = response
 //         commit('SET_TOKEN', data.token)
 //         setToken(data.token)

@@ -32,20 +32,20 @@ import Layout from '@/layout'
  */
 export const constantRoutes = [
   // {
-  //   path: '/login',
-  //   component: () => import('@/views/login/index'),
+  //   path: '/Trending',
+  //   component: () => import('@/views/Trending/index'),
   //   hidden: true
   // },
 
   {
     path: '/',
     component: Layout,
-    redirect: '/NEOOPS',
+    redirect: '/NeoOps',
     children: [{
-      path: 'NEOOPS',
-      name: 'NEOOPS',
-      component: () => import('@/views/NEOOPS/index'),
-      meta: { title: 'NEOOPS', icon: 'dashboard' }
+      path: 'NeoOps',
+      name: 'NeoOps',
+      component: () => import('@/views/NeoOps/index'),
+      meta: { title: 'NeoOps', icon: 'dashboard' }
     }]
   },
   {
@@ -53,110 +53,51 @@ export const constantRoutes = [
     component: () => import('@/views/404'),
     hidden: true
   },
-
-
   {
-    path: '/example',
+    path: '/Trending',
     component: Layout,
-    redirect: '/example/table',
-    name: 'TRENDING',
-    meta: { title: 'TRENDING', icon: 'el-icon-s-help' },
     children: [
       {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
+        path: 'Trending',
+        name: 'TRENDING',
+        component: () => import('@/views/Trending/index'),
+        meta: { title: 'TRENDING', icon: 'form' }
       }
     ]
   },
-
+  {
+    path: '/Pool',
+    component: Layout,
+    children: [
+      {
+        path: 'Pool',
+        name: 'POOL',
+        component: () => import('@/views/Pool/index'),
+        meta: { title: 'POOL', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/Owner',
+    component: Layout,
+    children: [
+      {
+        path: 'table',
+        name: 'OWNER',
+        component: () => import('@/views/Owner/index'),
+        meta: { title: 'OWNER', icon: 'form' }
+      }
+    ]
+  },
   {
     path: '/Player',
     component: Layout,
     children: [
       {
-        path: 'index',
+        path: 'Player',
         name: 'PLAYER',
         component: () => import('@/views/Player/index'),
         meta: { title: 'PLAYER', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/login',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        name: 'TRENDING',
-        component: () => import('@/views/login/index'),
-        meta: { title: 'TRENDING', icon: 'form' }
-      }
-    ]
-  },
-
-  {
-    path: '/nested',
-    component: Layout,
-    redirect: '/nested/menu1',
-    name: 'MANAGER',
-    meta: {
-      title: 'MANAGER',
-      icon: 'nested'
-    },
-    children: [
-      {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        name: 'Menu2',
-        meta: { title: 'menu2' }
       }
     ]
   },

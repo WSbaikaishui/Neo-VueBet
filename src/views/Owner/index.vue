@@ -1,6 +1,6 @@
 <template>
   <div style='padding:30px;'>
-    <el-alert :closable='false' title='menu 2' />
+    <el-button  type="primary" @click="fetchPoolList">刷新页面</el-button>
     <el-table
       v-loading="loading"
       :data='tableData'
@@ -94,19 +94,24 @@
           <el-tag v-else type="danger" >SHORT</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Cancel" align="center">
+      <el-table-column
+        label='CancelPool'
+        align="center"
+        width="400%">
         <template slot-scope="scope" >
-          <el-button @click="onCancelBet(scope.row, scope.$index)" type="success" size="large" plain>Cancel</el-button>
+          <el-button  @click="isOracleCall(scope.row)"  size="primary"  plain>oracle call</el-button>
+          <el-button  @click="isPayout(scope.row)"  size="primary"  plain>payout</el-button>
+          <el-button @click="isCancel(scope.row)"  size="primary" type="danger" plain>cancel</el-button>
         </template>
       </el-table-column>
-    </el-table>
 
+    </el-table>
   </div>
 </template>
-<script>
 
+<script>
 import { base64ToString, parseTime } from '@/utils'
-import Ops, { cancel_bet, test_cancel_bet, list_pools_by_player } from '../../api/ops'
+import { list_pools_by_owner, test_oracle_call, oracle_call, test_cancel_pool, cancel_pool, test_payout, payout } from '../../api/ops'
 export default {
   data() {
     return {
@@ -140,14 +145,21 @@ export default {
   },
 
   created: function() {
-    this.fetchPoolList()
+    if (window.neo3Dapi_save === '') {
+      this.tableData = []
+      this.loading = false
+      this.$message.error('请先连接NeoLine')
+    } else {
+      this.fetchPoolList()
+    }
   },
 
   methods: {
     async fetchPoolList() {
       const neo3Dapi = window.neo3Dapi_save
+      this.tableData = []
       try {
-        const runnable = await list_pools_by_player(neo3Dapi)
+        const runnable = await list_pools_by_owner(neo3Dapi)
         const result = runnable['stack'][0]['value']
         for (var i in result) {
           const res = result[i]['value']['value']
@@ -158,8 +170,6 @@ export default {
             } else {
               if (base64ToString(res[j]['key']['value']) === 'pool_owner' || base64ToString(res[j]['key']['value']) === 'token_id') {
                 json[base64ToString(res[j]['key']['value'])] = res[j]['value']['value']
-              } else if (base64ToString(res[j]['key']['value']) === 'position') {
-                json[base64ToString(res[j]['key']['value'])] = JSON.stringify(base64ToString(res[j]['value']['value'])).slice(6, 7)
               } else {
                 json[base64ToString(res[j]['key']['value'])] = base64ToString(res[j]['value']['value'])
               }
@@ -178,12 +188,16 @@ export default {
         console.log(e)
       }
     },
-    async cancelBet(pool_id) {
+    async oracleCall(val) {
+      console.log(111111)
       const neo3Dapi = window.neo3Dapi_save
       try {
-        const runnable = await test_cancel_bet(pool_id, neo3Dapi)
+        console.log(val)
+        const runnable = await test_oracle_call(val, neo3Dapi)
+        console.log(runnable.state)
         if (runnable.state) {
-          const response = await cancel_bet(pool_id, neo3Dapi)
+          const response = await oracle_call(val, neo3Dapi)
+
           return {
             'message': 'success',
             'data': 'TxId: ' + response['txid']
@@ -194,39 +208,24 @@ export default {
       } catch ({ type, description, data }) {
         switch (type) {
           case 'NO_PROVIDER':
-            this.$message({
-              'type': 'error',
-              'message': 'There is currently no provider available at NeoLine.'
-            })
+            this.$message.error('No provider available.')
             break
           case 'CONNECTION_DENIED':
-            this.$message({
-              'type': 'info',
-              'message': 'You have declined our request to connect with NeoLine.'
-            })
+            this.$message.error('The user rejected the request to connect with your dApp.')
             break
           case 'CANCELED':
-            this.$message({
-              'type': 'info',
-              'message': 'You have cancelled the transaction.'
-            })
+            this.$message.error('You have canceled your bet.')
             break
           case 'RPC_ERROR':
-            this.$message({
-              'type': 'error',
-              'message': 'RPC Client failed.'
-            })
+            this.$message.error('RPC connection failed.')
             break
           case 'MALFORMED_INPUT':
-            this.$message({
-              'type': 'error',
-              'message': 'There is something wrong with your input format.'
-            })
+            this.$message.error('Oops! There seems to be a problem with your input parameters.')
         }
       }
     },
-    onCancelBet(val, index) {
-      this.$confirm('You will be charged a 0.3% of your margin as penalty, plus any system / network fees incurred.', 'Confirm cancellation of bet?', {
+    isOracleCall(val) {
+      this.$confirm('oracle_call', '提示', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
         type: 'warning',
@@ -235,42 +234,167 @@ export default {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: 'Please connect to NeoLine first'
+            message: '请先连接NeoLine'
           })
         } else {
-          this.cancelBet(val['pool_id']).then((val) => {
+          this.oracleCall(val['pool_id']).then((val) => {
             this.$message({
               type: val.message,
               message: val.data
             })
-            this.tableData.splice(index, 1)
           }
           )
         }
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: 'You have cancelled the transaction.'
+          message: '已取消下注'
         })
       })
     },
+    async cancel(val) {
+      const neo3Dapi = window.neo3Dapi_save
+      try {
+        console.log(val)
+        const runnable = await test_cancel_pool(val, neo3Dapi)
+        console.log(runnable.state)
+        if (runnable.state) {
+          const response = await cancel_pool(val, neo3Dapi)
 
+          return {
+            'message': 'success',
+            'data': 'TxId: ' + response['txid'] + '\n 区块提交需要时间，请手动刷新'
+          }
+        } else {
+          return runnable
+        }
+      } catch ({ type, description, data }) {
+        switch (type) {
+          case 'NO_PROVIDER':
+            this.$message.error('No provider available.')
+            break
+          case 'CONNECTION_DENIED':
+            this.$message.error('The user rejected the request to connect with your dApp.')
+            break
+          case 'CANCELED':
+            this.$message.error('You have canceled your bet.')
+            break
+          case 'RPC_ERROR':
+            this.$message.error('RPC connection failed.')
+            break
+          case 'MALFORMED_INPUT':
+            this.$message.error('Oops! There seems to be a problem with your input parameters.')
+        }
+      }
+    },
+    isCancel(val) {
+      this.$confirm('是否要取消该赌局', '提示', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+        center: true
+      }).then(() => {
+        if (window.neo3Dapi_save === '') {
+          this.$message({
+            type: 'error',
+            message: '请先连接NeoLine'
+          })
+        } else {
+          this.cancel(val['pool_id']).then((val) => {
+            this.$message({
+              type: val.message,
+              message: val.data
+            })
+          }
+          )
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    isPayout(val) {
+      this.$confirm('是否确认结算赌局', '提示', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
+        type: 'warning',
+        center: true
+      }).then(() => {
+        if (window.neo3Dapi_save === '') {
+          this.$message({
+            type: 'error',
+            message: '请先连接NeoLine'
+          })
+        } else {
+          this.payout(val['pool_id']).then((val) => {
+            this.$message({
+              type: val.message,
+              message: val.data
+            })
+          }
+          )
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消'
+        })
+      })
+    },
+    async payout(val) {
+      const neo3Dapi = window.neo3Dapi_save
+      try {
+        console.log(val)
+        const runnable = await test_payout(val, neo3Dapi)
+        console.log(runnable.state)
+        if (runnable.state) {
+          const response = await payout(val, neo3Dapi)
+
+          return {
+            'message': 'success',
+            'data': 'TxId: ' + response['txid']
+          }
+        } else {
+          return runnable
+        }
+      } catch ({ type, description, data }) {
+        switch (type) {
+          case 'NO_PROVIDER':
+            this.$message.error('No provider available.')
+            break
+          case 'CONNECTION_DENIED':
+            this.$message.error('The user rejected the request to connect with your dApp.')
+            break
+          case 'CANCELED':
+            this.$message.error('You have canceled your bet.')
+            break
+          case 'RPC_ERROR':
+            this.$message.error('RPC connection failed.')
+            break
+          case 'MALFORMED_INPUT':
+            this.$message.error('Oops! There seems to be a problem with your input parameters.')
+        }
+      }
+    }
   }
+
 }
 
 </script>
 
 <style scoped>
-.demo-table-expand {
-  font-size: 0;
-}
-.demo-table-expand label {
-  width: 90px;
-  color: #99a9bf;
-}
-.demo-table-expand .el-form-item {
-  margin-right: 0;
-  margin-bottom: 0;
-  width: 50%;
-}
+  .demo-table-expand {
+    font-size: 0;
+  }
+  .demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+  }
+  .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
+  }
 </style>

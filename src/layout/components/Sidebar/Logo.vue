@@ -24,7 +24,7 @@ export default {
   },
   data() {
     return {
-      title: 'NEOOPS',
+      title: 'NeoOps',
       logo: require('@/assets/logo_transparent.png'),
       logo_mini: require('@/assets/logo_transparent_mini.png')
     }
