@@ -59,7 +59,7 @@ export default {
           })
         })
       } catch (e) {
-        this.$message.error('You have declined the request to connect to Neoline wallet.or No NeoLine')
+        this.$message.error('You have declined the request to connect to Neoline wallet or you don\'t have NeoLine installed')
       }
     },
     toggleSideBar() {

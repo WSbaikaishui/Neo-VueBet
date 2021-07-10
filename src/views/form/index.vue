@@ -247,10 +247,10 @@ export default {
     },
 
     confirmCreation() {
-      this.$confirm('You will be directed to NeoLine for a second approval.', 'Confirm creation of pool?', {
+      this.$confirm('You will be charged the amount of deposit entered (refundable), plus any system / network fee incurred.', 'Confirm creation of pool?', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
-        type: 'info',
+        type: 'warning',
         center: true
       }).then(() => {
         if (neo3.neo3Dapi_save === '') {
