@@ -5,8 +5,9 @@
       v-loading="loading"
       :data='tableData'
       style='width: 100%'
-    align="center">
-      <el-table-column type='expand'>
+    align="center"
+      @sort-change="onSortChange">
+      <el-table-column type='expand' >
         <template slot-scope='props'>
           <el-form label-position='left' inline class='demo-table-expand'>
             <el-form-item label='PoolHash'>
@@ -27,7 +28,9 @@
             <el-form-item label='TotalMargin'>
               <span>{{ props.row.total_margin }}</span>
             </el-form-item>
-
+            <el-form-item label='Deposit'>
+              <span>{{ props.row.deposit }}</span>
+            </el-form-item>
             <el-form-item label='Long'>
               <span>{{ props.row.long }}</span>
             </el-form-item>
@@ -46,17 +49,22 @@
       <el-table-column
         label='PoolHash'
         prop='pool_id'
-        align="center">
+        align="center"
+      >
       </el-table-column>
       <el-table-column
         label='Margin'
         prop='margin'
-        align="center">
+        align="center"
+        :sort-orders ="['ascending', 'descending' ]"
+      >
       </el-table-column>
       <el-table-column
         label='Expiry'
         prop='expiry '
         align="center"
+        sortable
+        :sort-orders ="['ascending', 'descending' ]"
       >
         <template scope='scope' style="text-align: center">
           {{  scope.row.expiry | parseTime( '{y}-{m}-{d} {h}:{i}') }}
@@ -65,9 +73,9 @@
       <el-table-column
         label='Symbol'
         prop='symbol'>
-                <template scope='scope'>
-                  {{  scope.row.symbol }}
-                </template>
+        <template scope='scope'>
+          {{  scope.row.symbol }}
+        </template>
       </el-table-column>
       <el-table-column
         label='Threshold'
@@ -78,7 +86,8 @@
       </el-table-column>
       <el-table-column
         label='Bet'
-      align="center">
+      align="center"
+      >
         <template slot-scope="scope" >
             <el-button @click="isBet(scope.row,1)"  type="primary" plain>Short</el-button>
           <el-button @click="isBet(scope.row,2)"  type="primary" plain>Long</el-button>
@@ -92,7 +101,7 @@
 <script>
 import Neon from '@cityofzion/neon-js'
 import { base64ToString, parseTime } from '@/utils'
-import Ops,{ test_bet, bet } from '../../../api/ops'
+import neo3, { test_bet, bet } from '../../../api/ops'
 export default {
   data() {
     return {
@@ -136,10 +145,14 @@ export default {
   },
 
   methods: {
+    onSortChange({ prop, order }) {
+      this.tableData = this.tableData.sort(this.compare(prop, order))
+      console.log(this.tableData)
+    },
     fetchPoolList() {
       const client = Neon.create.rpcClient('http://seed2t.neo.org:20332')
 
-      client.invokeFunction(Ops.BET_CONTRACT, 'list_ongoing_pools')
+      client.invokeFunction(neo3.BET_CONTRACT, 'list_ongoing_pools')
         .then(value => {
           var result = value['stack'][0]['value']
           for (var i in result) {
@@ -164,6 +177,7 @@ export default {
             json['symbol'] = url.slice(i1 + 7, i2)
             this.tableData.push(json)
           }console.log(this.tableData)
+          this.tableData = this.tableData.sort(this.compare('deposit', 'descending'))
           this.loading = false
         }
         )
@@ -201,7 +215,6 @@ export default {
             alert('Oops! There seems to be a problem with your input parameters.')
         }
       }
-      console.log()
     },
     isBet(val, option) {
       this.$confirm(option === 1 ? '此操作将下注为短仓?' : '此操作将下注为长仓?', '提示', {
@@ -231,57 +244,21 @@ export default {
         })
       })
     },
-
-    countDownFun(time) {
-      // console.log(time)
-
-      const startTime = new Date()
-      const end = new Date(time)
-      // console.log(end)
-      const result = parseInt((end - startTime) / 1000)
-      const d = parseInt(result / (24 * 60 * 60))
-      const h = parseInt((result / (60 * 60)) % 24)
-      const m = parseInt((result / 60) % 60)
-      const s = parseInt(result % 60)
-
-      if (result <= 0) {
-        return '倒计时结束'
-      }
-      if (h < 10) {
-        h = '0' + h
-      }
-      if (s < 10) {
-        s = '0' + s
-      }
-      if (h === 0 && m === 0) {
-        return s + '秒'
-      } else if (h === 0) {
-        return m + '分' + s + '秒'
-      } else if(d === 0) {
-        return h + '时' + m + '分' + s + '秒'
-      } else {
-        return d + '天' + h + '时' + m + '分' + s + '秒'
-      }
-    },
-
-    // 定时器
-    // 页面多个倒计时 归零时清除
-    countDown(i) {
-      var that = this
-      const item = that.tableData[i]
-      that.tableData[i].countDownFn = setInterval(() => {
-        //  console.log(that.countDownFun(item.endTime))
-        if (that.countDownFun(item.countDownTime) === '倒计时结束') {
-          clearInterval(that.tableData[i].countDownFn) //清除定时器
+    compare(propertyName, sort) {
+      return function(obj1, obj2) {
+        var value1 = obj1[propertyName]
+        var value2 = obj2[propertyName]
+        if (typeof value1 === 'string' && typeof value2 === 'string') {
+          const res = value1.localeCompare(value2, 'zh')
+          return sort === 'ascending' ? res : -res
         } else {
-          item.countDownTime = that.countDownFun(1635711484365)
-          that.$set(
-            that.tableData,
-            item.countDownTime,
-            that.countDownFun(item.expiry)
-          )
+          if (value1 <= value2) {
+            return sort === 'ascending' ? -1 : 1
+          } else if (value1 > value2) {
+            return sort === 'ascending' ? 1 : -1
+          }
         }
-      }, 1000)
+      }
     }
 
   }

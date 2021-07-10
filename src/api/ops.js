@@ -292,11 +292,13 @@ export async function test_pool_init(token_id, url, json_filter, margin, expiry,
   }
 }
 export async function cancel_pool(pool_id, neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
   const response = await neo3Dapi.invoke({
     scriptHash: BET_CONTRACT,
     operation: 'cancel_pool',
     args: [{
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -312,11 +314,13 @@ export async function cancel_pool(pool_id, neo3Dapi) {
 }
 
 export async function test_cancel_pool(pool_id, neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
   const response = await neo3Dapi.invokeRead({
     scriptHash: BET_CONTRACT,
     operation: 'cancel_pool',
     args: [{
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -329,17 +333,26 @@ export async function test_cancel_pool(pool_id, neo3Dapi) {
     ]
   })
   if (response.state === 'FAULT') {
-    alert('Oops! There seems to be an error!\n' + response.exception.slice(35))
-    return false
-  } else return true
+    return {
+      'message': 'error',
+      'data': response.exception.slice(35),
+      'state': false
+    }
+  } else {
+    return {
+      'state': true
+    }
+  }
 }
 
 export async function oracle_call(pool_id, neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
   const response = await neo3Dapi.invoke({
     scriptHash: BET_CONTRACT,
     operation: 'oracle_call',
     args: [{
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -355,11 +368,13 @@ export async function oracle_call(pool_id, neo3Dapi) {
 }
 
 export async function test_oracle_call(pool_id, neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
   const response = await neo3Dapi.invokeRead({
     scriptHash: BET_CONTRACT,
     operation: 'oracle_call',
     args: [{
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -372,17 +387,26 @@ export async function test_oracle_call(pool_id, neo3Dapi) {
     ]
   })
   if (response.state === 'FAULT') {
-    alert('Oops! There seems to be an error!\n' + response.exception.slice(35))
-    return false
-  } else return true
+    return {
+      'message': 'error',
+      'data': response.exception.slice(35),
+      'state': false
+    }
+  } else {
+    return {
+      'state': true
+    }
+  }
 }
 
 export async function payout(pool_id, neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
   const response = await neo3Dapi.invoke({
     scriptHash: BET_CONTRACT,
     operation: 'payout',
     args: [{
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -398,11 +422,13 @@ export async function payout(pool_id, neo3Dapi) {
 }
 
 export async function test_payout(pool_id, neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
   const response = await neo3Dapi.invokeRead({
     scriptHash: BET_CONTRACT,
     operation: 'payout',
     args: [{
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -415,9 +441,16 @@ export async function test_payout(pool_id, neo3Dapi) {
     ]
   })
   if (response.state === 'FAULT') {
-    alert('Oops! There seems to be an error!\n' + response.exception.slice(35))
-    return false
-  } else return true
+    return {
+      'message': 'error',
+      'data': response.exception.slice(35),
+      'state': false
+    }
+  } else {
+    return {
+      'state': true
+    }
+  }
 }
 
 export async function list_pools_by_owner(neo3Dapi) {
