@@ -229,7 +229,7 @@ export default {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: 'Please connect to NeoLine'
+            message: 'Please connect to NeoLine first.'
           })
         } else {
           this.playBet(val['pool_id'], option).then((val) => {

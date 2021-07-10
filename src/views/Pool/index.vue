@@ -232,10 +232,10 @@ export default {
         type: 'warning',
         center: true
       }).then(() => {
-        if (neo3.neo3Dapi_save === '') {
+        if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: 'Please first connect to NeoLine.'
+            message: 'Please connect to NeoLine first.'
           })
         } else {
           this.poolInit().then((val) => {
