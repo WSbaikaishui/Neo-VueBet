@@ -34,20 +34,11 @@
           <el-input-number v-model.number="form.deposit" :precision="0" :min="100000000" @change="handleChange" placeholder="Please input the deposit you would invest (In integer, GAS)" size="large"/>
         </el-form-item>
       </el-tooltip>
-      <el-form-item label="Time Limits" prop="time">
-        <el-row>
-          <el-col :span="11">
-            <el-form-item prop="expiry">
-              <el-date-picker v-model.number="form.expiry" type="datetime" placeholder="Pick an expiry for your pool" style="width: 80%" value-format="timestamp" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="2" />
-          <el-col :span="11">
-            <el-form-item prop="threshold">
-              <el-date-picker v-model.number="form.threshold" type="datetime" placeholder="Pick a threshold for players to join" style="width: 80%" value-format="timestamp" />
-            </el-form-item>
-          </el-col>
-        </el-row>
+      <el-form-item label="Expiry" prop="expiry">
+        <el-date-picker v-model.number="form.expiry" type="datetime" placeholder="Pick an expiry for your pool" style="width: 50%" value-format="timestamp" />
+      </el-form-item>
+      <el-form-item label="Threshold" prop="threshold">
+        <el-date-picker v-model.number="form.threshold" type="datetime" placeholder="Pick a threshold for players to join" style="width: 50%" value-format="timestamp" />
       </el-form-item>
       <el-form-item label="Strike Price" prop="strike">
         <el-input v-model="form.strike" placeholder="Strike price in decimals" style="width: 50%" />
@@ -97,9 +88,6 @@ export default {
         deposit: [
           { required: true, message: 'Please input deposit', trigger: 'blur' }
         ],
-        time: [
-          {required: true}
-        ],
         expiry: [
           { required: true, message: 'Please choose your expiry', trigger: 'blur' },
           {
@@ -130,20 +118,6 @@ export default {
             trigger: 'blur'
           }
         ],
-        // time: [
-        //   {
-        //     required: true,
-        //     validator(rule, value, callback) {
-        //       const threshold = this.$refs['Pool'].threshold.value
-        //       if (value && threshold && value < threshold) {
-        //         callback(new Error('Threshold must be set before expiry'))
-        //       } else {
-        //         callback()
-        //       }
-        //     },
-        //     trigger: 'blur'
-        //   }
-        // ],
         strike: [
           { required: true, message: 'Please enter strike price', trigger: 'blur' },
           {
