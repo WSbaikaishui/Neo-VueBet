@@ -118,7 +118,7 @@ export async function cancel_bet(pool_id, neo3Dapi) {
       value: result.address
     },
     {
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -144,7 +144,7 @@ export async function test_cancel_bet(pool_id, neo3Dapi) {
       value: result.address
     },
     {
-      type: 'Hash256',
+      type: 'ByteArray',
       value: pool_id
     }
     ],
@@ -157,10 +157,18 @@ export async function test_cancel_bet(pool_id, neo3Dapi) {
     ]
   })
   if (response.state === 'FAULT') {
-    alert('Oops! There seems to be an error!\n' + response.exception.slice(35))
-    return false
-  } else return true
+    return {
+      'message': 'error',
+      'data': response.exception.slice(35),
+      'state': false
+    }
+  } else {
+    return {
+      'state': true
+    }
+  }
 }
+
 export async function pool_init(token_id, url, json_filter, margin, expiry, threshold, deposit, strike, description, neo3Dapi) {
   const result = await neo3Dapi.getAccount()
   const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })

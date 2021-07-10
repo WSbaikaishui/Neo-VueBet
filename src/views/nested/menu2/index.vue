@@ -49,9 +49,36 @@
         align="center">
       </el-table-column>
       <el-table-column
+        label='Token'
+        prop='token'
+        align="center"
+      >
+        <template scope='scope' style="text-align: center">
+          {{  scope.row.token === 0? 'NEO' : 'GAS' }}
+        </template>
+      </el-table-column>
+      <el-table-column
         label='Margin'
         prop='margin'
         align="center">
+      </el-table-column>
+      <el-table-column
+        label='Symbol'
+        prop='symbol'
+        align="center"
+      >
+        <template scope='scope'>
+          {{  scope.row.symbol }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label='Strike Price'
+        prop='strike_price'
+        align="center"
+      >
+        <template scope='scope'>
+          {{  scope.row.strike_price }}
+        </template>
       </el-table-column>
       <el-table-column
         label='Expiry'
@@ -63,15 +90,10 @@
         </template>
       </el-table-column>
       <el-table-column
-        label='Symbol'
-        prop='symbol'>
-                <template scope='scope'>
-                  {{  scope.row.symbol }}
-                </template>
-      </el-table-column>
-      <el-table-column
         label='Threshold'
-        prop='threshold'>
+        prop='threshold'
+        align="center"
+      >
         <template scope='scope'>
           {{  scope.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}') }}
         </template>
@@ -80,8 +102,8 @@
         label='Bet'
       align="center">
         <template slot-scope="scope" >
-            <el-button @click="isBet(scope.row,1)"  type="primary" plain>Short</el-button>
-          <el-button @click="isBet(scope.row,2)"  type="primary" plain>Long</el-button>
+            <el-button @click="isBet(scope.row,1)"  type="primary" plain>Long</el-button>
+          <el-button @click="isBet(scope.row,2)"  type="primary" plain>Short</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -186,34 +208,49 @@ export default {
       } catch ({ type, description, data }) {
         switch (type) {
           case 'NO_PROVIDER':
-            alert('No provider available.')
+            this.$message({
+              'type': 'error',
+              'message': 'There is currently no provider available at NeoLine.'
+            })
             break
           case 'CONNECTION_DENIED':
-            alert('The user rejected the request to connect with your dApp.')
+            this.$message({
+              'type': 'info',
+              'message': 'You have declined our request to connect with NeoLine.'
+            })
             break
           case 'CANCELED':
-            alert('You have canceled your bet.')
+            this.$message({
+              'type': 'info',
+              'message': 'You have cancelled the transaction.'
+            })
             break
           case 'RPC_ERROR':
-            alert('RPC connection failed.')
+            this.$message({
+              'type': 'error',
+              'message': 'RPC Client failed.'
+            })
             break
           case 'MALFORMED_INPUT':
-            alert('Oops! There seems to be a problem with your input parameters.')
+            this.$message({
+              'type': 'error',
+              'message': 'There is something wrong with your input format.'
+            })
         }
       }
       console.log()
     },
     isBet(val, option) {
-      this.$confirm(option === 1 ? '此操作将下注为短仓?' : '此操作将下注为长仓?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm('You will be charged the amount of margin in the token specified plus any system / network fees incurred.', option === 1 ? 'Confirm to settle your position in long?' : 'Confirm to settle your position in short?', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning',
         center: true
       }).then(() => {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: '请先连接NeoLine'
+            message: 'Please connect to NeoLine first.'
           })
         } else {
           this.playBet(val['pool_id'], option).then((val) => {
@@ -227,7 +264,7 @@ export default {
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消下注'
+          message: 'You have cancelled the transaction.'
         })
       })
     },
