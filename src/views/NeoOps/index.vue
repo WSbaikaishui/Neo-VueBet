@@ -50,11 +50,6 @@
               <p class="text">NeoOps protects your assets by using NeoLine wallets.</p>
               <p class="text">Your assets will not leave your account unless you explicitly give permissions for such transactions. All invocations of smart contracts: from creating a pool to taking a position, are settled with the dAPI provided by NeoLine. Enjoy the freedom to cancel a transaction at any time.</p>
               <p class="text">Not yet installed? Go ahead and install the <a style="color: #1482f0" href="https://chrome.google.com/webstore/detail/neoline/cphhlgmgameodnhkjdmkpanlelnlohao?hl=en">NeoLine chrome extension</a>.</p>
-              <hr>
-              <el-button>Browse Openings</el-button>
-              <el-button>List Your Positons</el-button>
-              <el-button>Create a Pool</el-button>
-              <el-button>List Your Pools</el-button>
             </el-col>
           </el-row>
         </el-card>

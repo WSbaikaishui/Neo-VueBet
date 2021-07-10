@@ -61,31 +61,7 @@ export const constantRoutes = [
         path: 'Trending',
         name: 'TRENDING',
         component: () => import('@/views/Trending/index'),
-        meta: { title: 'TRENDING', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/Pool',
-    component: Layout,
-    children: [
-      {
-        path: 'Pool',
-        name: 'POOL',
-        component: () => import('@/views/Pool/index'),
-        meta: { title: 'POOL', icon: 'form' }
-      }
-    ]
-  },
-  {
-    path: '/Owner',
-    component: Layout,
-    children: [
-      {
-        path: 'table',
-        name: 'OWNER',
-        component: () => import('@/views/Owner/index'),
-        meta: { title: 'OWNER', icon: 'form' }
+        meta: { title: 'Trending', icon: 'example' }
       }
     ]
   },
@@ -95,13 +71,36 @@ export const constantRoutes = [
     children: [
       {
         path: 'Player',
-        name: 'PLAYER',
+        name: 'Player',
         component: () => import('@/views/Player/index'),
-        meta: { title: 'PLAYER', icon: 'form' }
+        meta: { title: 'Player', icon: 'user' }
       }
     ]
   },
-
+  {
+    path: '/Pool',
+    component: Layout,
+    children: [
+      {
+        path: 'Pool',
+        name: 'Pool',
+        component: () => import('@/views/Pool/index'),
+        meta: { title: 'Create a Pool', icon: 'form' }
+      }
+    ]
+  },
+  {
+    path: '/Owner',
+    component: Layout,
+    children: [
+      {
+        path: 'table',
+        name: 'Manager',
+        component: () => import('@/views/Owner/index'),
+        meta: { title: 'Manager', icon: 'table' }
+      }
+    ]
+  },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

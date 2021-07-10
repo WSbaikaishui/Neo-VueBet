@@ -79,11 +79,12 @@
       </el-table-column>
 
       <el-table-column
-        label='Bet'
+        label='Create Position'
+        width="240"
         align="center">
         <template slot-scope="scope" >
-          <el-button @click="isBet(scope.row,1)"  type="primary" plain>Short</el-button>
-          <el-button @click="isBet(scope.row,2)"  type="primary" plain>Long</el-button>
+          <el-button @click="isBet(scope.row,1)"  type="primary" plain>LONG</el-button>
+          <el-button @click="isBet(scope.row,2)"  type="danger" plain>SHORT</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -187,33 +188,48 @@ export default {
       } catch ({ type, description, data }) {
         switch (type) {
           case 'NO_PROVIDER':
-            alert('No provider available.')
+            this.$message({
+              'type': 'error',
+              'message': 'There is currently no provider available at NeoLine.'
+            })
             break
           case 'CONNECTION_DENIED':
-            alert('The user rejected the request to connect with your dApp.')
+            this.$message({
+              'type': 'info',
+              'message': 'You have declined our request to connect with NeoLine.'
+            })
             break
           case 'CANCELED':
-            alert('You have canceled your bet.')
+            this.$message({
+              'type': 'info',
+              'message': 'You have cancelled the transaction.'
+            })
             break
           case 'RPC_ERROR':
-            alert('RPC connection failed.')
+            this.$message({
+              'type': 'error',
+              'message': 'RPC Client failed.'
+            })
             break
           case 'MALFORMED_INPUT':
-            alert('Oops! There seems to be a problem with your input parameters.')
+            this.$message({
+              'type': 'error',
+              'message': 'There is something wrong with your input format.'
+            })
         }
       }
     },
     isBet(val, option) {
-      this.$confirm(option === 1 ? '此操作将下注为短仓?' : '此操作将下注为长仓?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm('You will be charged the margin specified in token, plus any system / network fees incurred.', option === 1 ? 'Confirm to settle long position?' : 'Confirm to settle short position?', {
+        confirmButtonText: 'Confirm',
+        cancelButtonText: 'Cancel',
         type: 'warning',
         center: true
       }).then(() => {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: '请先连接NeoLine'
+            message: 'Please connect to NeoLine'
           })
         } else {
           this.playBet(val['pool_id'], option).then((val) => {
@@ -227,7 +243,7 @@ export default {
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消下注'
+          message: 'Transaction cancelled.'
         })
       })
     },

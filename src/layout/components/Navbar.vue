@@ -7,7 +7,7 @@
     <div class="right-menu">
 <!--      <el-dropdown class="avatar-container" trigger="click">-->
         <div class="avatar-wrapper" style="margin-right: 30px">
-          <el-button v-if="!neo3Dapi" type="primary" @click="wallet()">Connect to Neo </el-button>
+          <el-button v-if="!neo3Dapi" type="primary" @click="wallet()">Connect to NeoLine </el-button>
           <el-tag v-else type="success" effect="dark">Connected  </el-tag>
         </div>
         <router-link to="/" />

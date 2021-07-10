@@ -1,6 +1,6 @@
 <template>
   <div style="padding:30px;">
-    <el-button  type="primary" @click="fetchPoolList">刷新页面</el-button>
+    <el-button  type="primary" @click="fetchPoolList">Refresh</el-button>
     <el-table
       v-loading="loading"
       :data="tableData"
@@ -97,7 +97,7 @@
       </el-table-column>
       <el-table-column label="Cancel" align="center">
         <template slot-scope="scope">
-          <el-button type="success" size="large" plain @click="onCancelBet(scope.row, scope.$index)">Cancel</el-button>
+          <el-button type="success" size="large" plain @click="onCancelBet(scope.row)">Cancel</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -125,8 +125,8 @@ export default {
     statusPromptFilter(status) {
       const statusMap = {
         0: 'Ongoing',
-        1: 'Finished',
-        2: 'Canceled'
+        1: 'Cancelled',
+        2: 'Finished'
       }
       return statusMap[status]
     }
@@ -144,7 +144,7 @@ export default {
     if (window.neo3Dapi_save === '') {
       this.tableData = []
       this.loading = false
-      this.$message.error('请先连接NeoLine')
+      this.$message.error('Please connect to NeoLine first.')
     } else {
       this.fetchPoolList()
     }
@@ -193,7 +193,7 @@ export default {
           const response = await cancel_bet(pool_id, neo3Dapi)
           return {
             'message': 'success',
-            'data': 'TxId: ' + response['txid'] + '\n 区块提交需要时间，请手动刷新'
+            'data': 'TxId: ' + response['txid'] + '\n Allow time for transaction confirmation. Please refresh manually.'
           }
         } else {
           return runnable
@@ -232,7 +232,7 @@ export default {
         }
       }
     },
-    onCancelBet(val, index) {
+    onCancelBet(val) {
       this.$confirm('You will be charged a 0.3% of your margin as penalty, plus any system / network fees incurred.', 'Confirm cancellation of bet?', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
@@ -250,7 +250,6 @@ export default {
               type: val.message,
               message: val.data
             })
-            this.tableData.splice(index, 1)
           }
           )
         }

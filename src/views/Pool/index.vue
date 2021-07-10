@@ -29,9 +29,11 @@
           <el-input-number v-model.number="form.margin" :precision="0" :min="1" @change="handleChange" placeholder="Please input the margin you require (In integer)" size="large"/>
         </el-form-item>
       </el-tooltip>
-      <el-form-item label="Desposit" prop="deposit">
-        <el-input-number v-model.number="form.deposit" :precision="0" :min="100000000" @change="handleChange" placeholder="Please input the deposit you would invest (In integer, GAS)" size="large"/>
-      </el-form-item>
+      <el-tooltip class="item" content="The deposit you would like to invest. In GAS (integer)." placement="top-start">
+        <el-form-item label="Desposit" prop="deposit">
+          <el-input-number v-model.number="form.deposit" :precision="0" :min="100000000" @change="handleChange" placeholder="Please input the deposit you would invest (In integer, GAS)" size="large"/>
+        </el-form-item>
+      </el-tooltip>
       <el-form-item label="Time Limits" prop="time">
         <el-row>
           <el-col :span="11">
@@ -94,6 +96,9 @@ export default {
         ],
         deposit: [
           { required: true, message: 'Please input deposit', trigger: 'blur' }
+        ],
+        time: [
+          {required: true}
         ],
         expiry: [
           { required: true, message: 'Please choose your expiry', trigger: 'blur' },

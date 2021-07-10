@@ -1,6 +1,6 @@
 <template>
   <div style='padding:30px;'>
-    <el-button  type="primary" @click="fetchPoolList">刷新页面</el-button>
+    <el-button  type="primary" @click="fetchPoolList">Refresh</el-button>
     <el-table
       v-loading="loading"
       :data='tableData'
@@ -85,23 +85,13 @@
         </template>
       </el-table-column>
       <el-table-column
-        label='Position'
-        prop='position'
-        align="center"
-      >
-        <template scope='scope'>
-          <el-tag v-if="scope.row.position === '1'" >LONG</el-tag>
-          <el-tag v-else type="danger" >SHORT</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label='CancelPool'
+        label='Pool Management'
         align="center"
         width="400%">
         <template slot-scope="scope" >
-          <el-button  @click="isOracleCall(scope.row)"  size="primary"  plain>oracle call</el-button>
-          <el-button  @click="isPayout(scope.row)"  size="primary"  plain>payout</el-button>
-          <el-button @click="isCancel(scope.row)"  size="primary" type="danger" plain>cancel</el-button>
+          <el-button  @click="isOracleCall(scope.row)"  size="primary"  plain>Oracle Call</el-button>
+          <el-button  @click="isPayout(scope.row)"  size="primary"  plain>Payout</el-button>
+          <el-button @click="isCancel(scope.row)"  size="primary" type="danger" plain>Cancel</el-button>
         </template>
       </el-table-column>
 
@@ -137,8 +127,8 @@ export default {
     statusPromptFilter(status){
       const statusMap = {
         0: 'Ongoing',
-        1: 'Finished',
-        2: 'Canceled'
+        1: 'Cancelled',
+        2: 'Finished'
       }
       return statusMap[status]
     }
@@ -148,7 +138,7 @@ export default {
     if (window.neo3Dapi_save === '') {
       this.tableData = []
       this.loading = false
-      this.$message.error('请先连接NeoLine')
+      this.$message.error('Please connect to NeoLine first.')
     } else {
       this.fetchPoolList()
     }
@@ -225,7 +215,7 @@ export default {
       }
     },
     isOracleCall(val) {
-      this.$confirm('oracle_call', '提示', {
+      this.$confirm('You will be charged 1 GAS for making the call plus any system / network fees incurred.', 'Confirm to make orcale call?', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
         type: 'warning',
@@ -234,7 +224,7 @@ export default {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: '请先连接NeoLine'
+            message: 'Please connect to NeoLine first.'
           })
         } else {
           this.oracleCall(val['pool_id']).then((val) => {
@@ -248,7 +238,7 @@ export default {
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消下注'
+          message: 'Transaction cancelled.'
         })
       })
     },
@@ -263,7 +253,7 @@ export default {
 
           return {
             'message': 'success',
-            'data': 'TxId: ' + response['txid'] + '\n 区块提交需要时间，请手动刷新'
+            'data': 'TxId: ' + response['txid'] + '\n Allow time for transaction confirmation. Please refresh manually.'
           }
         } else {
           return runnable
@@ -288,7 +278,7 @@ export default {
       }
     },
     isCancel(val) {
-      this.$confirm('是否要取消该赌局', '提示', {
+      this.$confirm('You will lose all of your deposit plus the system / network fees incurred.', 'Confirm to cancel pool?', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
         type: 'warning',
@@ -297,7 +287,7 @@ export default {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: '请先连接NeoLine'
+            message: 'Please connect to NeoLine first.'
           })
         } else {
           this.cancel(val['pool_id']).then((val) => {
@@ -311,12 +301,12 @@ export default {
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消'
+          message: 'Transaction cancelled.'
         })
       })
     },
     isPayout(val) {
-      this.$confirm('是否确认结算赌局', '提示', {
+      this.$confirm('You will pay for the system / network fees incurred.', 'Confirm to process payout?', {
         confirmButtonText: 'Confirm',
         cancelButtonText: 'Cancel',
         type: 'warning',
@@ -325,7 +315,7 @@ export default {
         if (window.neo3Dapi_save === '') {
           this.$message({
             type: 'error',
-            message: '请先连接NeoLine'
+            message: 'Please connect to NeoLine first.'
           })
         } else {
           this.payout(val['pool_id']).then((val) => {
@@ -339,7 +329,7 @@ export default {
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消'
+          message: 'Transaction cancelled.'
         })
       })
     },
@@ -362,19 +352,34 @@ export default {
       } catch ({ type, description, data }) {
         switch (type) {
           case 'NO_PROVIDER':
-            this.$message.error('No provider available.')
+            this.$message({
+              'type': 'error',
+              'message': 'There is currently no provider available at NeoLine.'
+            })
             break
           case 'CONNECTION_DENIED':
-            this.$message.error('The user rejected the request to connect with your dApp.')
+            this.$message({
+              'type': 'info',
+              'message': 'You have declined our request to connect with NeoLine.'
+            })
             break
           case 'CANCELED':
-            this.$message.error('You have canceled your bet.')
+            this.$message({
+              'type': 'info',
+              'message': 'You have cancelled the transaction.'
+            })
             break
           case 'RPC_ERROR':
-            this.$message.error('RPC connection failed.')
+            this.$message({
+              'type': 'error',
+              'message': 'RPC Client failed.'
+            })
             break
           case 'MALFORMED_INPUT':
-            this.$message.error('Oops! There seems to be a problem with your input parameters.')
+            this.$message({
+              'type': 'error',
+              'message': 'There is something wrong with your input format.'
+            })
         }
       }
     }
