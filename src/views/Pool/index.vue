@@ -56,7 +56,7 @@
 
 <script>
 
-import neo3, { test_pool_init, pool_init } from '../../api/ops'
+import { test_pool_init, pool_init } from '../../api/ops'
 
 export default {
   data() {
@@ -93,11 +93,11 @@ export default {
           {
             validator(rule, value, callback) {
               const date = new Date()
-              const timestamp = date.getTime() + 10 * 60 * 1000
+              const timestamp = date.getTime() + 5 * 60 * 1000
               if (timestamp < value) {
                 callback()
               } else {
-                callback(new Error('Expiry time must be at least ten minutes later'))
+                callback(new Error('Expiry time must be at least five minutes later'))
               }
             },
             trigger: 'blur'

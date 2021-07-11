@@ -3,7 +3,7 @@ window.neo3Dapi_save = ''
 window.isNeoLine = true
 
 let initResult
-const BET_CONTRACT = '0x70eec13e22e13b2acc1d67e79d63b0c23823d5b9'
+const BET_CONTRACT = '0x3d2824ad4bbdf36dd2511c4a16c666317765d84a'
 const asdas = ''
 export default {
   BET_CONTRACT,

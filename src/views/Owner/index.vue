@@ -179,7 +179,6 @@ export default {
       }
     },
     async oracleCall(val) {
-      console.log(111111)
       const neo3Dapi = window.neo3Dapi_save
       try {
         console.log(val)
