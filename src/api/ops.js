@@ -485,6 +485,25 @@ export async function list_pools_by_owner(neo3Dapi) {
   return response
 }
 
+export async function list_ongoing_pools(neo3Dapi) {
+  const result = await neo3Dapi.getAccount()
+  const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })
+  const response = await neo3Dapi.invokeRead({
+    scriptHash: BET_CONTRACT,
+    operation: 'list_ongoing_pools',
+    args: [
+    ],
+    fee: '0.00000001',
+    broadcastOverride: false,
+    signers: [{
+      account: scriptHash,
+      scopes: 1
+    }
+    ]
+  })
+  return response
+}
+
 export async function list_pools_by_player(neo3Dapi) {
   const result = await neo3Dapi.getAccount()
   const { scriptHash } = await neo3Dapi.AddressToScriptHash({ address: result.address })

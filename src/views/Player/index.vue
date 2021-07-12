@@ -11,7 +11,7 @@
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-card shadow="never">
-              <el-form-item label="Description">
+              <el-form-item label="Description" style="width: 100%">
                 <span>{{ props.row.description }}</span>
               </el-form-item>
             </el-card>
