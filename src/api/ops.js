@@ -6,8 +6,7 @@ let initResult
 const BET_CONTRACT = '0x3d2824ad4bbdf36dd2511c4a16c666317765d84a'
 const asdas = ''
 export default {
-  BET_CONTRACT,
-  asdas
+  BET_CONTRACT
 }
 export function init() {
   return new Promise((resovle, reject) => {
@@ -25,6 +24,7 @@ export function init() {
     window.isNeoLine = false
   )
 }
+
 export function getNeoDapiInstances() {
   if (!initResult) {
     initResult = init()

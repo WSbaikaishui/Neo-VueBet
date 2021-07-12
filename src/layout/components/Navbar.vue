@@ -8,6 +8,7 @@
 <!--      <el-dropdown class="avatar-container" trigger="click">-->
         <div class="avatar-wrapper" style="margin-right: 30px">
           <el-button v-if="!neo3Dapi" type="primary" @click="wallet()">Connect to NeoLine </el-button>
+<!--          <el-button v-if="!neo3Dapi" type="primary" @click="georr()">Connect to NeoLine </el-button>-->
           <el-tag v-else type="success" effect="dark">Connected  </el-tag>
         </div>
         <router-link to="/" />
@@ -20,7 +21,7 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import { getNeoDapiInstances } from '../../api/ops'
+import { getNeoDapiInstances, getNeoDapiInstances2 } from '../../api/ops'
 
 export default {
   components: {
@@ -43,6 +44,13 @@ export default {
   },
 
   methods: {
+    async georr() {
+      const neo3Dapi = (await getNeoDapiInstances2()).neo3Dapi
+      await (window.neo3Dapi_save = await neo3Dapi)
+      const { address } = await neo3Dapi.getAccount()
+      await (this.neo3Dapi = await neo3Dapi)
+      console.log(address)
+    },
     async getNeo3() {
       const neo3Dapi = (await getNeoDapiInstances()).neo3Dapi
       await (window.neo3Dapi_save = await neo3Dapi)

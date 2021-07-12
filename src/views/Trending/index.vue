@@ -3,7 +3,7 @@
     <el-button  type="primary" @click="fetchPoolList">Refresh</el-button>
     <el-table
       v-loading="loading"
-      :data='tableData'
+      :data='tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)'
       style='width: 100%'
       align="center">
       <el-table-column type='expand'>
@@ -85,8 +85,18 @@
           <el-button @click="isBet(scope.row,2)"  type="danger" plain>SHORT</el-button>
         </template>
       </el-table-column>
-    </el-table>
 
+    </el-table>
+    <el-pagination align='center'
+                   @size-change="handleSizeChange"
+                   @current-change="handleCurrentChange"
+                   :current-page="currentPage"
+                   :page-sizes="[5,10,20]"
+                   :page-size="pageSize"
+                   layout="total, sizes, prev, pager, next, jumper"
+                   :total="tableData.length"
+                    style="margin-top: 50px">
+    </el-pagination>
   </div>
 </template>
 
@@ -97,7 +107,9 @@ export default {
   data() {
     return {
       tableData: [],
-
+      currentPage: 1,
+      total: 20,
+      pageSize: 5,
       content: '',
       loading: true
 
@@ -136,6 +148,16 @@ export default {
   },
 
   methods: {
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`)
+      this.currentPage = 1
+      this.pageSize = val
+    },
+
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`)
+      this.currentPage = val
+    },
     onSortChange({ prop, order }) {
       this.tableData = this.tableData.sort(this.compare(prop, order))
       console.log(this.tableData)
