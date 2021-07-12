@@ -1,5 +1,6 @@
 <template>
   <div style='padding:30px;'>
+    <el-button  type="primary" @click="fetchPoolList">Refresh</el-button>
     <el-table
       v-loading="loading"
       :data='tableData'
@@ -24,9 +25,6 @@
             </el-form-item>
             <el-form-item label='Threshold'>
               <span>{{ props.row.threshold | parseTime( '{y}-{m}-{d} {h}:{i}')}}</span>
-            </el-form-item>
-            <el-form-item label='Total Margin'>
-              <span>{{ props.row.deposit }}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -93,9 +91,8 @@
 </template>
 
 <script>
-import Neon from '@cityofzion/neon-js'
 import { base64ToString, parseTime } from '@/utils'
-import neo3, { test_bet, bet } from '../../api/ops'
+import { test_bet, bet, list_pools_by_owner } from '../../api/ops'
 export default {
   data() {
     return {
@@ -129,7 +126,13 @@ export default {
   },
 
   created: function() {
-    this.fetchPoolList()
+    if (window.neo3Dapi_save === '') {
+      this.tableData = []
+      this.loading = false
+      this.$message.error('Please connect to NeoLine first.')
+    } else {
+      this.fetchPoolList()
+    }
   },
 
   methods: {
@@ -137,40 +140,44 @@ export default {
       this.tableData = this.tableData.sort(this.compare(prop, order))
       console.log(this.tableData)
     },
-    fetchPoolList() {
-      const client = Neon.create.rpcClient('http://seed2t.neo.org:20332')
+    async fetchPoolList() {
+      this.loading = true
+      const neo3Dapi = window.neo3Dapi_save
       this.tableData = []
-      client.invokeFunction(neo3.BET_CONTRACT, 'list_ongoing_pools')
-        .then(value => {
-          var result = value['stack'][0]['value']
-          for (var i in result) {
-            const res = result[i]['value']['value']
-            const json = {}
-            for (var j in res) {
-              if (res[ j ]['value']['type'] === 'Integer') {
+      try {
+        const runnable = await list_pools_by_owner(neo3Dapi)
+        const result = runnable['stack'][0]['value']
+        for (var i in result) {
+          const res = result[i]['value']['value']
+          const json = {}
+          for (var j in res) {
+            if (res[ j ]['value']['type'] === 'Integer') {
+              json[base64ToString(res[j]['key']['value'])] = res[j]['value']['value']
+            } else {
+              if (base64ToString(res[j]['key']['value']) === 'pool_owner' || base64ToString(res[j]['key']['value']) === 'token_id') {
                 json[base64ToString(res[j]['key']['value'])] = res[j]['value']['value']
               } else {
-                if (base64ToString(res[j]['key']['value']) === 'pool_owner' || base64ToString(res[j]['key']['value']) === 'token_id') {
-                  json[base64ToString(res[j]['key']['value'])] = res[j]['value']['value']
-                } else {
-                  json[base64ToString(res[j]['key']['value'])] = base64ToString(res[j]['value']['value'])
-                }
+                json[base64ToString(res[j]['key']['value'])] = base64ToString(res[j]['value']['value'])
               }
             }
-            json['pool_id'] = result[i]['key']['value']
-            var url = json['url']
-            var i1 = url.indexOf('symbol=')
+          }
+          json['pool_id'] = result[i]['key']['value']
+          var url = json['url']
+          var i1 = url.indexOf('symbol=')
 
-            var i2 = url.indexOf('&')
-            json['symbol'] = url.slice(i1 + 7, i2)
-            this.tableData.push(json)
-          }console.log(this.tableData)
-          this.tableData = this.tableData.sort(this.compare('deposit', 'descending'))
-          this.loading = false
+          var i2 = url.indexOf('&')
+          json['symbol'] = url.slice(i1 + 7, i2)
+          this.tableData.push(json)
         }
-        )
-        .catch(err => console.log(err))
+        this.tableData = this.tableData.sort(this.compare('deposit', 'descending'))
+        this.loading = false
+      } catch (e) {
+        console.log(e)
+      }
     },
+
+
+
     async playBet(val, option) {
       const neo3Dapi = window.neo3Dapi_save
       try {

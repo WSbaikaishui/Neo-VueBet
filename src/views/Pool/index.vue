@@ -26,12 +26,12 @@
       </el-form-item>
       <el-tooltip class="item" content="The margin your players should invest. In integer." placement="top-start">
         <el-form-item label="Margin" prop="margin">
-          <el-input-number v-model.number="form.margin" :precision="0" :min="1" @change="handleChange" placeholder="Please input the margin you require (In integer)" size="large"/>
+          <el-input-number v-model.number="form.margin" :precision="0" :min="1" @change="handleChange"  style="width: 250px" placeholder="Please input the margin you require (In integer)" size="large"/>
         </el-form-item>
       </el-tooltip>
-      <el-tooltip class="item" content="The deposit you would like to invest. In GAS (integer)." placement="top-start">
+      <el-tooltip class="item" content="The deposit you would like to invest. In GAS (integer)."  placement="top-start">
         <el-form-item label="Desposit" prop="deposit">
-          <el-input-number v-model.number="form.deposit" :precision="0" :min="100000000" @change="handleChange" placeholder="Please input the deposit you would invest (In integer, GAS)" size="large"/>
+          <el-input-number v-model.number="form.deposit" :precision="0" :min="1000000000" @change="handleChange"  style="width: 250px" placeholder="Please input the deposit you would invest (In integer, GAS)" size="large"/>
         </el-form-item>
       </el-tooltip>
       <el-form-item label="Expiry" prop="expiry">
@@ -64,7 +64,7 @@ export default {
       form: {
         token: '',
         symbol: '',
-        margin: 1,
+        margin: 100000000,
         deposit: 2,
         expiry: '',
         threshold: '',
@@ -126,7 +126,7 @@ export default {
               if (reg.test(value)) {
                 callback()
               } else {
-                callback(new Error('Please enter a price with less than 6 decimal places.'))
+                callback(new Error('Please enter a price with at least 1 decimal place. 10 digits maximum in total.'))
               }
             },
             trigger: 'blur'
@@ -222,7 +222,6 @@ export default {
             })
         }
       }
-      console.log()
     },
 
     confirmCreation() {
@@ -254,10 +253,9 @@ export default {
       })
     },
     resetForm(formName) {
-      this.$refs[formName].resetFields();
+      this.$refs[formName].resetFields()
     },
     handleChange(value) {
-      console.log(value)
     }
   }
 }
